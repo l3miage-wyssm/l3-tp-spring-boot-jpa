@@ -10,10 +10,12 @@ import fr.uga.l3miage.library.service.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collection;
@@ -47,19 +49,19 @@ public class AuthorsController {
                 .toList();
     }
 
-    @GetMapping("/api/authors/{id}") //Chemin de l'api pour appeler cette fonction
-    public AuthorDTO author(Long id) throws EntityNotFoundException{
+    @GetMapping("/authors/{id}") //Chemin de l'api pour appeler cette fonction
+    public AuthorDTO author(@PathVariable("id") Long id) throws EntityNotFoundException{
         Author auteur = authorService.get(id); //On rérupère l'auteur en passant par le service authorService
         return authorMapper.entityToDTO(auteur); //On "parse" l'auteur en type DTO
     }
 
-    @PostMapping("/api/authors")
+    @PostMapping("/authors")
     public AuthorDTO newAuthor(AuthorDTO author) {
         authorService.save(authorMapper.dtoToEntity(author));
         return author;
     }
 
-    @PutMapping("/api/authors/{id}")
+    @PutMapping("/authors/{id}")
     public AuthorDTO updateAuthor(AuthorDTO author, Long id) throws EntityNotFoundException{
         if(author.id()==id){
             authorService.update(authorMapper.dtoToEntity(author));
@@ -71,7 +73,7 @@ public class AuthorsController {
         return author;
     }
 
-    @DeleteMapping("/api/authors/{id}")
+    @DeleteMapping("/authors/{id}")
     public void deleteAuthor(Long id) throws EntityNotFoundException, DeleteAuthorException {
         authorService.delete(id);
         // unimplemented... yet!
