@@ -51,16 +51,24 @@ public class AuthorsController {
 
     @GetMapping("/authors/{id}") //Chemin de l'api pour appeler cette fonction
     public AuthorDTO author(@PathVariable("id") Long id) throws EntityNotFoundException{
-        Author auteur = authorService.get(id); //On rérupère l'auteur en passant par le service authorService
-        return authorMapper.entityToDTO(auteur); //On "parse" l'auteur en type DTO
+        //gère mois les exeptions
+        try{
+            Author auteur = authorService.get(id);//On rérupère l'auteur en passant par le service authorService
+            return authorMapper.entityToDTO(auteur); //On "parse" l'auteur en type DTO 
+        }
+        catch(EntityNotFoundException e){
+            throw new EntityNotFoundException("Auteur non trouvé");
+        }
     }
 
+    //creation d'un auteur
     @PostMapping("/authors")
     public AuthorDTO newAuthor(AuthorDTO author) {
         authorService.save(authorMapper.dtoToEntity(author));
         return author;
     }
 
+    //mise à jour d'un auteur
     @PutMapping("/authors/{id}")
     public AuthorDTO updateAuthor(AuthorDTO author, Long id) throws EntityNotFoundException{
         if(author.id()==id){
@@ -73,6 +81,7 @@ public class AuthorsController {
         return author;
     }
 
+    //suppression d'un auteur
     @DeleteMapping("/authors/{id}")
     public void deleteAuthor(Long id) throws EntityNotFoundException, DeleteAuthorException {
         authorService.delete(id);
