@@ -1,9 +1,11 @@
 package fr.uga.l3miage.library.authors;
 
 import fr.uga.l3miage.data.domain.Author;
+import fr.uga.l3miage.data.domain.Book;
 import fr.uga.l3miage.library.books.BookDTO;
 import fr.uga.l3miage.library.books.BooksMapper;
 import fr.uga.l3miage.library.service.AuthorService;
+import fr.uga.l3miage.library.service.BookService;
 import fr.uga.l3miage.library.service.DeleteAuthorException;
 import fr.uga.l3miage.library.service.EntityNotFoundException;
 
@@ -53,7 +55,7 @@ public class AuthorsController {
     }
 
     @GetMapping("/authors/{id}") //Chemin de l'api pour appeler cette fonction
-    public AuthorDTO author(@PathVariable("id") Long id) throws EntityNotFoundException{
+    public AuthorDTO author(@PathVariable("id") Long id) {
         //gère mois les exeptions
         try{
             Author auteur = authorService.get(id);//On rérupère l'auteur en passant par le service authorService
@@ -68,8 +70,13 @@ public class AuthorsController {
     @PostMapping("/authors")
     @ResponseStatus(HttpStatus.CREATED)
     public AuthorDTO newAuthor(@RequestBody AuthorDTO author) {
-        Author auteur=authorService.save(authorMapper.dtoToEntity(author));
-        return authorMapper.entityToDTO(auteur);
+        if(author.fullName()==null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        else {
+            Author auteur=authorService.save(authorMapper.dtoToEntity(author));
+            return authorMapper.entityToDTO(auteur);
+        }   
     }
 
     //mise à jour d'un auteur
@@ -100,7 +107,15 @@ public class AuthorsController {
         }      // unimplemented... yet!
     }
 
-    public Collection<BookDTO> books(Long authorId) {
+    @GetMapping("/authors/{authorId}/books")
+    public Collection<BookDTO> books(@PathVariable("authorId") Long authorId) {
+        // try{
+        //     Collection<Book> livres = BookService.getByAuthor(authorId);
+
+        // }
+        // catch(EntityNotFoundException e){
+        //     throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        // }
         return Collections.emptyList();
     }
 

@@ -47,6 +47,7 @@ public class BooksController {
         return book;
     }
 
+    
     public BookDTO updateBook(Long authorId, BookDTO book) {
         // attention BookDTO.id() doit être égale à id, sinon la requête utilisateur est mauvaise
         return null;
