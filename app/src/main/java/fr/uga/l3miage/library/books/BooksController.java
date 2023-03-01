@@ -34,8 +34,14 @@ public class BooksController {
 
     @GetMapping("/books/v1")
     public Collection<BookDTO> books(@RequestParam("q") String query) {
-        Collection <Book> livre=bookService.findByTitle(query);
-        return booksMapper.entityToDTO(livre);
+        Collection <Book> livres;
+        if (query==null){
+            livres=bookService.list();
+        }
+        else {
+            livres=bookService.findByTitle(query);
+        }
+        return booksMapper.entityToDTO(livres);
     }
 
     @GetMapping("/books/{id}")
@@ -54,8 +60,12 @@ public class BooksController {
     public BookDTO newBook(Long authorId, BookDTO book) throws EntityNotFoundException{
         try{
             bookService.getByAuthor(authorId);
+            if (book.title()==null || book.title().trim()==""){
+                //faut-il publier un livre incomplet ?
+            }
             Book livre = bookService.save(authorId, booksMapper.dtoToEntity(book));
             return booksMapper.entityToDTO(livre);
+
         }catch(EntityNotFoundException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
