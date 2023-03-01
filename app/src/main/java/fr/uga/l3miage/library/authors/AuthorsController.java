@@ -70,7 +70,7 @@ public class AuthorsController {
     @PostMapping("/authors")
     @ResponseStatus(HttpStatus.CREATED)
     public AuthorDTO newAuthor(@RequestBody AuthorDTO author) {
-        if(author.fullName()==null){
+        if(author.fullName()==null || author.fullName().trim()==""){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         else {
