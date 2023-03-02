@@ -73,11 +73,13 @@ public class BooksController {
             bookService.getByAuthor(authorId);
             if (book.title()==null || book.title().trim()==""){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Pas de titre !");
+            }  
+            if(book.language()!=null){
+                if(!(book.language().replaceAll("\\s", " ").equals(langages[1].name().toLowerCase()) || book.language().replaceAll("\\s", " ").equals(langages[0].name().toLowerCase()))){
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Language incorrecte");
+                }
             }
-            // if (book.language()==null){
-            //     throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Langue incorrecte");
-            // }
-            //if(book.language()!= langages[0])
+            
             if (book.isbn()<1000000000 || book.isbn()>100000000000000L){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"ISBN incorrecte");
             }
@@ -92,6 +94,7 @@ public class BooksController {
         //bookService.save(authorId,booksMapper.dtoToEntity(book));
         
     }
+    
 
     
     @PutMapping("/v1/books/{authorId}")
