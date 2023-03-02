@@ -9,6 +9,7 @@ import fr.uga.l3miage.library.service.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,8 +35,8 @@ public class BooksController {
         this.booksMapper = booksMapper;
     }
 
-    @GetMapping("/books/v1")
-    public Collection<BookDTO> books(@RequestParam("q") String query) {
+    @GetMapping("/v1/books")
+    public Collection<BookDTO> books(@RequestParam(required = false) String query) {
         Collection <Book> livres;
         if (query==null){
             livres=bookService.list();
@@ -43,10 +44,12 @@ public class BooksController {
         else {
             livres=bookService.findByTitle(query);
         }
-        return booksMapper.entityToDTO(livres);
+        return livres.stream()
+            .map(booksMapper::entityToDTO)
+            .toList();
     }
 
-    @GetMapping("/books/{id}")
+    @GetMapping("/v1/books/{id}")
     public BookDTO book(@PathVariable("id") Long id) throws EntityNotFoundException {
         try{
         Book livre = bookService.get(id);
@@ -61,14 +64,21 @@ public class BooksController {
     @PostMapping("/v1/authors/{authorId}/books")
     @ResponseStatus(HttpStatus.CREATED)
     public BookDTO newBook(@PathVariable("authorId") Long authorId,@RequestBody BookDTO book) throws EntityNotFoundException{
+        Book livre;
         try{
             bookService.getByAuthor(authorId);
             if (book.title()==null || book.title().trim()==""){
-                //faut-il publier un livre incomplet ?
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Pas de titre !");
             }
-            Book livre = bookService.save(authorId, booksMapper.dtoToEntity(book));
+            if (book.language()==null){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Langue incorrecte");
+            }
+            if (book.isbn()>999999999){
+                System.out.println(book.isbn());
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"ISBN incorrecte");
+            }
+            livre = bookService.save(authorId, booksMapper.dtoToEntity(book));
             return booksMapper.entityToDTO(livre);
-
         }catch(EntityNotFoundException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
@@ -82,7 +92,15 @@ public class BooksController {
         return null;
     }
 
-    public void deleteBook(Long id) {
+    @DeleteMapping("/v1/books/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteBook(@PathVariable("id") Long id) {
+        try{
+            bookService.delete(id);
+        }
+        catch (EntityNotFoundException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }  
 
     }
 
