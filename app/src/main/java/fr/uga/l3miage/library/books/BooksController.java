@@ -2,6 +2,7 @@ package fr.uga.l3miage.library.books;
 
 import fr.uga.l3miage.data.domain.Author;
 import fr.uga.l3miage.data.domain.Book;
+import fr.uga.l3miage.data.domain.Book.Language;
 import fr.uga.l3miage.library.authors.AuthorDTO;
 import fr.uga.l3miage.library.service.AuthorService;
 import fr.uga.l3miage.library.service.BookService;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Year;
 import java.util.Collection;
 
 @RestController
@@ -65,31 +68,42 @@ public class BooksController {
     @ResponseStatus(HttpStatus.CREATED)
     public BookDTO newBook(@PathVariable("authorId") Long authorId,@RequestBody BookDTO book) throws EntityNotFoundException{
         Book livre;
+        Language[] langages = Book.Language.values();
         try{
             bookService.getByAuthor(authorId);
             if (book.title()==null || book.title().trim()==""){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Pas de titre !");
             }
-            if (book.language()==null){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Langue incorrecte");
-            }
-            if (book.isbn()>999999999){
-                System.out.println(book.isbn());
+            // if (book.language()==null){
+            //     throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Langue incorrecte");
+            // }
+            //if(book.language()!= langages[0])
+            if (book.isbn()<1000000000 || book.isbn()>100000000000000L){
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"ISBN incorrecte");
+            }
+            if (book.year()<200 || book.year()>Year.now().getValue()){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Année incorrecte");
             }
             livre = bookService.save(authorId, booksMapper.dtoToEntity(book));
             return booksMapper.entityToDTO(livre);
         }catch(EntityNotFoundException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         //bookService.save(authorId,booksMapper.dtoToEntity(book));
         
     }
 
     
-    public BookDTO updateBook(Long authorId, BookDTO book) {
+    @PutMapping("/v1/books/{authorId}")
+    public BookDTO updateBook(@PathVariable("authorId") Long authorId,@RequestBody BookDTO book) throws EntityNotFoundException{
         // attention BookDTO.id() doit être égale à id, sinon la requête utilisateur est mauvaise
-        return null;
+        if(authorId==book.id()){
+            bookService.update(booksMapper.dtoToEntity(book));
+        }
+        else{
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        return book;
     }
 
     @DeleteMapping("/v1/books/{id}")
@@ -105,6 +119,7 @@ public class BooksController {
     }
 
 
+    //@PutMapping("/V1/books/{id}/author")
     public void addAuthor(Long authorId, AuthorDTO author) {
 
     }
