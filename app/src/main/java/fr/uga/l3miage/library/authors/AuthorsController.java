@@ -33,12 +33,14 @@ public class AuthorsController {
     private final AuthorService authorService;
     private final AuthorMapper authorMapper;
     private final BooksMapper booksMapper;
+    private final BookService bookService;
 
     @Autowired
-    public AuthorsController(AuthorService authorService, AuthorMapper authorMapper, BooksMapper booksMapper) {
+    public AuthorsController(AuthorService authorService, AuthorMapper authorMapper, BooksMapper booksMapper,BookService bookService) {
         this.authorService = authorService;
         this.authorMapper = authorMapper;
         this.booksMapper = booksMapper;
+        this.bookService = bookService;
     }
 
     @GetMapping("/authors")
@@ -70,6 +72,7 @@ public class AuthorsController {
     @PostMapping("/authors")
     @ResponseStatus(HttpStatus.CREATED)
     public AuthorDTO newAuthor(@RequestBody AuthorDTO author) {
+        System.out.println(author.fullName());
         if(author.fullName()==null || author.fullName().trim()==""){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
@@ -109,14 +112,15 @@ public class AuthorsController {
 
     @GetMapping("/authors/{authorId}/books")
     public Collection<BookDTO> books(@PathVariable("authorId") Long authorId) {
-        // try{
-        //     Collection<Book> livres = BookService.getByAuthor(authorId);
-
-        // }
-        // catch(EntityNotFoundException e){
-        //     throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        // }
-        return Collections.emptyList();
+        try{
+            Collection<Book> livres = bookService.getByAuthor(authorId);
+            return livres.stream()
+                .map(booksMapper::entityToDTO)
+                .toList();
+        }
+        catch(EntityNotFoundException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 
 }
