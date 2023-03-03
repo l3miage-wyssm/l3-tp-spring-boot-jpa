@@ -72,7 +72,7 @@ public class AuthorsController {
     @PostMapping("/authors")
     @ResponseStatus(HttpStatus.CREATED)
     public AuthorDTO newAuthor(@RequestBody AuthorDTO author) {
-        System.out.println(author.fullName());
+        //System.out.println(author.fullName());
         if(author.fullName()==null || author.fullName().trim()==""){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
@@ -107,7 +107,7 @@ public class AuthorsController {
         }
         catch (EntityNotFoundException | DeleteAuthorException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }      // unimplemented... yet!
+        }
     }
 
     @GetMapping("/authors/{authorId}/books")

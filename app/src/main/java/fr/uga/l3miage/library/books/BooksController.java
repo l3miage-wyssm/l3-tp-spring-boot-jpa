@@ -97,16 +97,25 @@ public class BooksController {
     
 
     
-    @PutMapping("/v1/books/{authorId}")
-    public BookDTO updateBook(@PathVariable("authorId") Long authorId,@RequestBody BookDTO book) throws EntityNotFoundException{
+    @PutMapping("/v1/books/{id}")
+    public BookDTO updateBook(@PathVariable("id") Long id,@RequestBody BookDTO book) throws EntityNotFoundException{
         // attention BookDTO.id() doit être égale à id, sinon la requête utilisateur est mauvaise
-        if(authorId==book.id()){
-            bookService.update(booksMapper.dtoToEntity(book));
+        BookDTO livreDTO;
+        if(id==book.id()){
+            //System.out.println(booksMapper.entityToDTO(bookService.get(id)));
+            Collection<Author> auteurs = bookService.get(id).getAuthors();// récupération des auteurs
+            bookService.update(booksMapper.dtoToEntity(book));//mise à jour du livre
+            Book livre=booksMapper.dtoToEntity(book);
+            for(Author auteur: auteurs){ // ajout des auteurs au livre
+                livre=bookService.addAuthor(livre.getId(),auteur.getId());
+            }
+            livreDTO = booksMapper.entityToDTO(livre);
+            //System.out.println(livreDTO);
         }
         else{
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-        return book;
+        return livreDTO;
     }
 
     @DeleteMapping("/v1/books/{id}")
