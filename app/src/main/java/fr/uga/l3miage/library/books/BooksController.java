@@ -123,6 +123,7 @@ public class BooksController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBook(@PathVariable("id") Long id) {
         try{
+            System.out.println("On supprime le livre suivant : "+booksMapper.entityToDTO(bookService.get(id)));
             bookService.delete(id);
         }
         catch (EntityNotFoundException e){
@@ -141,7 +142,7 @@ public class BooksController {
             bookService.addAuthor(id,author.id());
         }
         catch (EntityNotFoundException e){
-            System.out.println(livre+" "+author.fullName());
+            System.out.println(livre+" "+author);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }
