@@ -4,6 +4,7 @@ import fr.uga.l3miage.data.domain.Author;
 import fr.uga.l3miage.data.domain.Book;
 import fr.uga.l3miage.data.domain.Book.Language;
 import fr.uga.l3miage.library.authors.AuthorDTO;
+import fr.uga.l3miage.library.authors.AuthorMapper;
 import fr.uga.l3miage.library.service.AuthorService;
 import fr.uga.l3miage.library.service.BookService;
 import fr.uga.l3miage.library.service.EntityNotFoundException;
@@ -131,8 +132,17 @@ public class BooksController {
     }
 
 
-    //@PutMapping("/V1/books/{id}/author")
-    public void addAuthor(Long authorId, AuthorDTO author) {
-
+    @PutMapping("/v1/books/{id}/authors")
+    //@ResponseStatus(HttpStatus.OK)
+    public void addAuthor(@PathVariable("id") Long id,@RequestBody AuthorDTO author) {
+        BookDTO livre=null;
+        try{
+            livre = booksMapper.entityToDTO(bookService.get(id));
+            bookService.addAuthor(id,author.id());
+        }
+        catch (EntityNotFoundException e){
+            System.out.println(livre+" "+author.fullName());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 }

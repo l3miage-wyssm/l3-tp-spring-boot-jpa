@@ -102,8 +102,24 @@ public class AuthorsController {
     @DeleteMapping("/authors/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAuthor(@PathVariable("id") Long id) {
+        boolean estCoAuteur=false;
         try{
-            authorService.delete(id);
+            Collection <Book> livres=bookService.getByAuthor(id);
+            if(livres!=null){
+                for(Book livre: livres){
+                    livre.getAuthors();
+                    for(Author auteur: livre.getAuthors()){
+                        if(auteur.getId()!=id){
+                            estCoAuteur=true;
+                        }
+                    }
+                }
+                if(!estCoAuteur){
+                    authorService.delete(id);
+                }
+                else {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"L'auteur est co-auteur");
+            }}
         }
         catch (EntityNotFoundException | DeleteAuthorException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
